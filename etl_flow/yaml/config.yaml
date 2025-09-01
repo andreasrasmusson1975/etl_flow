@@ -1,0 +1,3 @@
+storage_account:
+  sas_token_env: "CHAT_DB_CONTAINER_SAS_TOKEN"
+  container_url_env: "CHAT_DB_CONTAINER_URL"

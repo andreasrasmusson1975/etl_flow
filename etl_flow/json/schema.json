@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DatabaseDump",
+  "type": "object",
+  "properties": {
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "started_at": { "type": "string", "format": "date-time" },
+          "meta": { "type": ["string", "null"] }
+        },
+        "required": ["id", "started_at", "meta"]
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "ts": { "type": "string", "format": "date-time" },
+          "session_id": { "type": "string" },
+          "round": { "type": ["integer", "null"] },
+          "kind": { "type": "string" },
+          "role": { "type": "string" },
+          "content": { "type": "string" },
+          "raw_text": { "type": ["string", "null"] },
+          "meta": { "type": ["string", "null"] }
+        },
+        "required": [
+          "id", "ts", "session_id", "round", "kind", "role",
+          "content", "raw_text", "meta"
+        ]
+      }
+    },
+    "event_parents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "child_id": { "type": "string" },
+          "parent_id": { "type": "string" }
+        },
+        "required": ["child_id", "parent_id"]
+      }
+    }
+  },
+  "required": ["sessions", "events", "event_parents"]
+}

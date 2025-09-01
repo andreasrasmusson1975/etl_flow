@@ -1,0 +1,3 @@
+# Include all yaml files in the etl_flow package and its subdirectories
+recursive-include etl_flow *.yaml
+recursive-include etl_flow *.json

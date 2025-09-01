@@ -1,0 +1,46 @@
+sql_statements:
+  schema_sql: | 
+    -- Enable foreign keys
+    PRAGMA foreign_keys = ON;
+
+    -- sessions
+    CREATE TABLE IF NOT EXISTS sessions (
+    id TEXT PRIMARY KEY,
+    started_at TEXT DEFAULT (datetime('now')),
+    meta TEXT  -- JSON blob as TEXT
+    );
+
+    -- append-only events
+    CREATE TABLE IF NOT EXISTS events (
+    id TEXT PRIMARY KEY,
+    ts TEXT NOT NULL,             -- ISO8601 UTC
+    session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+    round INTEGER,
+    kind TEXT NOT NULL,           -- pm_out, arch_out, dev_out, review_out, test_out, exec_result, user_prompt, summary
+    role TEXT NOT NULL,           -- PM, Architect, Dev, Reviewer, Tester, System, User
+    content TEXT NOT NULL,        -- parsed structured JSON (stored as TEXT)
+    raw_text TEXT,                -- exact model output (optional)
+    meta TEXT                   -- JSON: tokens, temp, schema_version, etc.
+    );
+    -- lineage graph (DAG edges)
+    CREATE TABLE IF NOT EXISTS event_parents (
+    child_id TEXT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    parent_id TEXT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    PRIMARY KEY (child_id, parent_id)
+    );
+
+
+    CREATE INDEX IF NOT EXISTS events_session_ts    ON events(session_id, ts);
+    CREATE INDEX IF NOT EXISTS events_session_kind  ON events(session_id, kind, ts);
+
+  insert_sessions:
+    INSERT INTO sessions (id, started_at, meta) VALUES (?, ?, ?);
+  
+  insert_events:
+    INSERT INTO events
+    (id, ts, session_id, round, kind, role, content, raw_text, meta)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+  insert_event_parents:
+    INSERT INTO event_parents (child_id, parent_id) VALUES (?, ?)
+  
